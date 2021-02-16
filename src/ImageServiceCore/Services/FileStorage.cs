@@ -16,6 +16,7 @@ namespace ImageServiceCore.Services
         public FileStorage(Options options)
         {
             this.options = options;
+            if (!Directory.Exists(this.options.BasePath)) Directory.CreateDirectory(this.options.BasePath);
         }
 
         private string GetFullPath(string name)

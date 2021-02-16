@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageServiceCore", "ImageSe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageServiceCore.Specs", "ImageServiceCore.Specs\ImageServiceCore.Specs.csproj", "{96AF8535-F3E8-49A3-A0A3-27151FE093D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{DD630927-F50D-4539-9DC6-B4D79BD83C8A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{96AF8535-F3E8-49A3-A0A3-27151FE093D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96AF8535-F3E8-49A3-A0A3-27151FE093D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96AF8535-F3E8-49A3-A0A3-27151FE093D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DD630927-F50D-4539-9DC6-B4D79BD83C8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD630927-F50D-4539-9DC6-B4D79BD83C8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD630927-F50D-4539-9DC6-B4D79BD83C8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD630927-F50D-4539-9DC6-B4D79BD83C8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
