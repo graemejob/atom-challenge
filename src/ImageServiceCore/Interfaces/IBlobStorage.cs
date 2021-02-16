@@ -1,10 +1,12 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 
 namespace ImageServiceCore.Interfaces
 {
     public interface IBlobStorage
     {
-        Stream Get(string name);
-        void Set(Stream stream, string name);
+        public bool Exists(string name);
+        public byte[] Get(string name);
+        public void Set(string name, byte[] bytes);
     }
 }

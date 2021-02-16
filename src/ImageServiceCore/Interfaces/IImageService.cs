@@ -4,6 +4,6 @@ namespace ImageServiceCore.Interfaces
 {
     public interface IImageService
     {
-        public Stream Get(string name, string format, int? maxWidth, int? maxHeight, string watermark);
+        public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string watermark);
     }
 }

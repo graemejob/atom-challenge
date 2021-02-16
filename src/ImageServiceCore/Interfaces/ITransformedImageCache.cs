@@ -4,7 +4,8 @@ namespace ImageServiceCore.Interfaces
 {
     public interface ITransformedImageCache
     {
-        Stream Get(string name, string format, int maxWidth, int maxHeight, string watermark);
-        void Set(Stream stream, string name, string format, int maxWidth, int maxHeight, string watermark);
+        public bool Exists(string name, string format, (int? Width, int? Height) maxSize, string watermark);
+        public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string watermark);
+        public void Set(byte[] bytes, string name, string format, (int? Width, int? Height) maxSize, string watermark);
     }
 }

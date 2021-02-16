@@ -4,6 +4,6 @@ namespace ImageServiceCore.Interfaces
 {
     public interface IImageTransformer
     {
-        public Stream Transform(Stream stream, string format, int maxWidth, int maxHeight, string watermark);
+        public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string watermark);
     }
 }
