@@ -1,17 +1,98 @@
 ﻿@page
 @model ProofOfConcept.Pages.IndexModel
+    <html>
+    <head><title>Image transform console</title>
+    </head>
+    <body>
 
-@if ((Model?.Items ?? new string[0]).Length > 0)
-{
-    <h3>@Model.Items.Length items in source folder \atom-challence\images</h3>
-    <ul>
-        @foreach (var item in Model.Items)
-        {
-            <li><a href="/images/@item">@item</a></li>
-        }
-    </ul>
-}
-else
-{
-    <h3>No images in source folder \atom-challence\images</h3>
-}
+        <div style="position: fixed; overflow: hidden;">
+            <label for="imgName">Name: </label>
+            <input id="imgName" type="text" oninput="updateImageLink()" placeholder="Enter image name" />
+
+            <label for="imgMaxWidth">Max Width: </label>
+            <input id="imgMaxWidth" type="number" oninput="updateImageLink()" placeholder="Enter max width" />
+
+            <label for="imgMaxHeight">Max Height: </label>
+            <input id="imgMaxHeight" type="number" oninput="updateImageLink()" placeholder="Enter max height" />
+
+            <label for="imgFormat">Format: </label>
+            <input id="imgFormat" type="text" oninput="updateImageLink()" placeholder="Enter image format" />
+
+            <label for="imgWatermark">Watermark: </label>
+            <input id="imgWatermark" type="text" oninput="updateImageLink()" placeholder="Enter watermark" />
+
+            <h3 id="imageLink"></h3>
+            <a href="#" onclick="setBackground(); return false;">Set Background</a>|
+            <a href="#" onclick="openNewTab(); return false;">Open in New Tab</a>
+        </div>
+        <div style="position: fixed; top: 8em; bottom: 0; left: 0; right: 0; overflow-y: scroll;">
+            @if ((Model?.Items ?? new string[0]).Length > 0)
+            {
+                <h3>@Model.Items.Length items in source folder \atom-challence\images</h3>
+                <ul>
+                    @foreach (var item in Model.Items)
+                    {
+                        <li><a href="#" onclick="selectImage(this); return false;">@item</a></li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <h3>No images in source folder \atom-challence\images</h3>
+            }
+        </div>
+        <script>
+
+            function selectImage(element) {
+                var imageName = element.innerText;
+                document.getElementById('imgName').value = imageName;
+                updateImageLink();
+            }
+
+            function updateImageLink() {
+
+                var imageLink = "images/";
+
+                imageLink += document.getElementById('imgName').value;
+
+                var params = {
+                    w: document.getElementById('imgMaxWidth').value,
+                    h: document.getElementById('imgMaxHeight').value,
+                    f: document.getElementById('imgFormat').value,
+                    t: document.getElementById('imgWatermark').value
+                };
+
+                if (!params.w) delete params.w;
+                if (!params.h) delete params.h;
+                if (!params.f) delete params.f;
+                if (!params.t) delete params.t;
+
+                var esc = encodeURIComponent;
+                var query = Object.keys(params)
+                    .map(k => esc(k) + '=' + esc(params[k]))
+                    .join('&');
+
+                if (query) imageLink += "?" + query;
+
+                document.getElementById('imageLink').innerText = imageLink;
+            }
+
+            function setBackground() {
+
+                var imageLink = document.getElementById('imageLink').innerText;
+                document.body.style.backgroundImage = "url('" + imageLink + "')";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundPosition = "center";
+                document.body.style.backgroundAttachment = "fixed";
+
+                //document.body.style.background = "url('img_tree.gif') no-repeat center fixed";
+            }
+
+            function openNewTab() {
+
+                var imageLink = document.getElementById('imageLink').innerText;
+                window.open(imageLink);
+            }
+        </script>
+</body>
+</html>

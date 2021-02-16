@@ -1,4 +1,6 @@
 ﻿using ImageServiceCore.Interfaces;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -10,11 +12,13 @@ namespace ImageServiceCore.Services
     {
         private readonly Font font;
         private readonly Brush brush;
+        private readonly ILogger<BitmapImageTransformer> logger;
 
-        public BitmapImageTransformer()
+        public BitmapImageTransformer(ILogger<BitmapImageTransformer> logger)
         {
             this.font = new Font(FontFamily.GenericSansSerif, 16F, FontStyle.Bold | FontStyle.Italic);
             this.brush = new SolidBrush(Color.FromArgb(32, Color.Black));
+            this.logger = logger;
         }
 
         /// <summary>
@@ -27,34 +31,48 @@ namespace ImageServiceCore.Services
         /// <returns>Array of bytes representing the transformed image file</returns>
         public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string watermark)
         {
+            var stopwatch = Stopwatch.StartNew();
+
+            byte[] returnBytes = null;
+
             using (var image = LoadImage(bytes))
             {
                 var currentImageFormat = image.RawFormat;
                 var newImageFormat = ParseImageFormatOrDefault(format) ?? currentImageFormat;
                 var currentDims = (image.Width, image.Height);
                 var newDims = CalculateNewDimensions((image.Width, image.Height), maxSize);
-                if (!string.IsNullOrWhiteSpace(watermark))
-                {
-                    DrawWatermark(watermark, image);
-                }
-                else if (newDims == currentDims && newImageFormat == currentImageFormat)
-                {
-                    // No transformation required
-                    return bytes;
-                }
 
-                if (newDims != currentDims)
+                if (string.IsNullOrWhiteSpace(watermark) && newDims == currentDims && newImageFormat == currentImageFormat)
                 {
-                    using (var resizedImage = ResizeImage(image, newDims))
-                    {
-                        return SaveImageToByteArray(resizedImage, newImageFormat);
-                    }
+                    logger.LogTrace("No transformation required. Returning original image");
+                    // No transformation required
+                    returnBytes = bytes;
                 }
                 else
                 {
-                    return SaveImageToByteArray(image, newImageFormat);
+                    if (!string.IsNullOrWhiteSpace(watermark))
+                    {
+                        logger.LogTrace("Drawing watermark");
+                        DrawWatermark(watermark, image);
+                    }
+
+                    if (newDims != currentDims)
+                    {
+                        logger.LogTrace("Resizing image");
+                        using (var resizedImage = ResizeImage(image, newDims))
+                        {
+                            returnBytes = SaveImageToByteArray(resizedImage, newImageFormat);
+                        }
+                    }
+                    else
+                    {
+                        returnBytes = SaveImageToByteArray(image, newImageFormat);
+                    }
                 }
             }
+            logger.LogInformation($"Transformed image in {stopwatch.ElapsedMilliseconds} ms");
+            
+            return returnBytes;
         }
 
         // Create image from byte array

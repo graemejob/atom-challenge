@@ -2,27 +2,50 @@
 using ImageServiceCore.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace ImageServiceCore.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddLocalFileImageService(this IServiceCollection services)
+        /// <summary>
+        /// Register Image Service
+        /// </summary>
+        public static IServiceCollection AddImageService(this IServiceCollection services)
         {
             return services
-                .AddTransient<IImageBlobStorage>(o => 
-                new ImageFileStorage(GetOptions<FileStorage.Options>(o, "ImageFileStorage")))
-                .AddTransient<ICacheBlobStorage>(o => 
-                new CacheFileStorage(GetOptions<FileStorage.Options>(o, "CacheFileStorage")))
                 .AddTransient<IImageService, ImageService>()
-                .AddTransient<ITransformedImageCache, TransformedImageCache>()
-                .AddTransient<IImageTransformer, BitmapImageTransformer>();
+                .AddTransient<ITransformedImageCache, TransformedImageCache>();
         }
 
-        private static T GetOptions<T>(IServiceProvider serviceProvider, string key)
+        /// <summary>
+        /// Register local file storage for images and cache
+        /// </summary>
+        public static IServiceCollection AddImageServiceLocalFileStorage(this IServiceCollection services)
         {
-            return serviceProvider.GetRequiredService<IConfiguration>().GetSection(key).Get<T>();
+            FileStorage.Options GetConfig(IServiceProvider serviceProvider, string key) => 
+                serviceProvider.GetRequiredService<IConfiguration>().GetSection(key).Get<FileStorage.Options>();
+
+            ILogger<T> GetLogger<T>(IServiceProvider serviceProvider) => 
+                serviceProvider.GetRequiredService<ILogger<T>>();
+
+            return services
+                .AddTransient<IImageBlobStorage>(o => 
+                    new ImageFileStorage(GetConfig(o, "ImageFileStorage"), GetLogger<ImageFileStorage>(o)))
+                .AddTransient<ICacheBlobStorage>(o => 
+                    new CacheFileStorage(GetConfig(o, "CacheFileStorage"), GetLogger<CacheFileStorage>(o)));
+        }
+
+        /// <summary>
+        /// Register BitmapImageTransformer as the transform strategy
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddBitmapImageTransformer(this IServiceCollection services)
+        {
+            return services
+                .AddTransient<IImageTransformer, BitmapImageTransformer>();
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-
-namespace ImageServiceCore.Interfaces
+﻿namespace ImageServiceCore.Interfaces
 {
     public interface IBlobStorage
     {
