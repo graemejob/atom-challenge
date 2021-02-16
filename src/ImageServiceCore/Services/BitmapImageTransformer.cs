@@ -13,7 +13,7 @@ namespace ImageServiceCore.Services
 
         public BitmapImageTransformer()
         {
-            this.font = new Font(FontFamily.GenericSansSerif, 22F, FontStyle.Bold | FontStyle.Italic);
+            this.font = new Font(FontFamily.GenericSansSerif, 16F, FontStyle.Bold | FontStyle.Italic);
             this.brush = new SolidBrush(Color.FromArgb(32, Color.Black));
         }
 
@@ -122,7 +122,9 @@ namespace ImageServiceCore.Services
             var graphics = Graphics.FromImage(image);
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
             graphics.CompositingQuality = CompositingQuality.HighQuality;
-            graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            graphics.SmoothingMode = SmoothingMode.HighQuality;
+            graphics.CompositingMode = CompositingMode.SourceOver;
+            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             return graphics;
         }
 

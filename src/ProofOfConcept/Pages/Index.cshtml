@@ -1,0 +1,17 @@
+﻿@page
+@model ProofOfConcept.Pages.IndexModel
+
+@if ((Model?.Items ?? new string[0]).Length > 0)
+{
+    <h3>@Model.Items.Length items in source folder \atom-challence\images</h3>
+    <ul>
+        @foreach (var item in Model.Items)
+        {
+            <li><a href="/images/@item">@item</a></li>
+        }
+    </ul>
+}
+else
+{
+    <h3>No images in source folder \atom-challence\images</h3>
+}

@@ -1,5 +1,6 @@
 ﻿using ImageServiceCore.Interfaces;
 using System.IO;
+using System.Linq;
 
 namespace ImageServiceCore.Services
 {
@@ -19,7 +20,7 @@ namespace ImageServiceCore.Services
 
         private string GetFullPath(string name)
         {
-            return Path.Combine(options.BasePath);
+            return Path.Combine(options.BasePath, name);
         }
 
         public byte[] Get(string name)
@@ -38,6 +39,11 @@ namespace ImageServiceCore.Services
         {
             string fullPath = GetFullPath(name);
             return File.Exists(fullPath);
+        }
+
+        public string[] List()
+        {
+            return Directory.GetFiles(options.BasePath).Select(s => Path.GetFileName(s)).ToArray();
         }
     }
 }

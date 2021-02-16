@@ -1,1 +1,0 @@
-Place any original images in this folder
