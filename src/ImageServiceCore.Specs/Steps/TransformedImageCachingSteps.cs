@@ -10,7 +10,7 @@ namespace ImageServiceCore.Specs.Steps
     public class TransformedImageCachingSteps
     {
         private readonly ScenarioContext scenarioContext;
-        private (string Name, (int? Width, int? Height) MaxSize, string Format, string Watermark) request;
+        private (string Name, (int? Width, int? Height) MaxSize, string Format, string Colour, string Watermark) request;
         private string transformFilename;
         public TransformedImageCachingSteps(ScenarioContext scenarioContext)
         {
@@ -52,7 +52,7 @@ namespace ImageServiceCore.Specs.Steps
         {
             var fakeStorage = new FakeCacheStorage();
             var service = new TransformedImageCache(fakeStorage);
-            service.Exists(request.Name, request.Format, request.MaxSize, request.Watermark);
+            service.Exists(request.Name, request.Format, request.MaxSize, request.Colour, request.Watermark);
             transformFilename = fakeStorage.NameParameter;
         }
         
@@ -82,6 +82,10 @@ namespace ImageServiceCore.Specs.Steps
             public void Set(string name, byte[] bytes)
             {
                 NameParameter = name;
+            }
+            public string[] List()
+            {
+                return new string[0];
             }
         }
     }

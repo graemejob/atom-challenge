@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using ImageServiceCore.Interfaces;
 using ImageServiceCore.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace ImageServiceCore.Specs.Steps
         private int? maxWidth;
         private int? maxHeight;
         private string format;
+        private string colour;
         private string watermark;
         private bool existsInBlobStorage;
         private bool existsInCacheStorage;
@@ -60,6 +62,9 @@ namespace ImageServiceCore.Specs.Steps
         [Given(@"the required format is (.*)")]
         public void GivenTheRequiredFormatIs(string format) => this.format = format;
 
+        [Given(@"the required background colour is (.*)")]
+        public void GivenTheRequiredBackgroundColourIs(string colour) => this.colour = colour;
+
         [Given(@"the required watermark is '(.*)'")]
         public void GivenTheRequiredWatermarkIs(string watermark) => this.watermark = watermark;
 
@@ -69,12 +74,12 @@ namespace ImageServiceCore.Specs.Steps
         public void WhenRequestingTheImageFromImageService()
         {
             var fakeImageBlobStorage = new FakeImageBlobStorage(name, existsInBlobStorage);
-            var fakeTransformedImageCache = new FakeTransformedImageCache(name, format, (maxWidth, maxHeight), watermark, existsInCacheStorage);
+            var fakeTransformedImageCache = new FakeTransformedImageCache(name, format, (maxWidth, maxHeight), colour, watermark, existsInCacheStorage);
             var fakeImageTransformer = new FakeImageTransformer();
 
-            var service = new ImageService(fakeTransformedImageCache, fakeImageBlobStorage, fakeImageTransformer);
+            var service = new ImageService(fakeTransformedImageCache, fakeImageBlobStorage, fakeImageTransformer, NullLogger<ImageService>.Instance);
 
-            service.Get(name, format, (maxWidth, maxHeight), watermark);
+            service.Get(name, format, (maxWidth, maxHeight), colour, watermark);
             Thread.Sleep(10); // Wait for async task to finish
             cacheIsChecked = fakeTransformedImageCache.ExistsCalled;
             imageReadFromCacheStorage = fakeTransformedImageCache.GetCalled;
@@ -130,33 +135,35 @@ namespace ImageServiceCore.Specs.Steps
             private readonly string format;
             private readonly (int? Width, int? Height) maxSize;
             private readonly string watermark;
+            private readonly string colour;
             private readonly bool exists;
 
-            public FakeTransformedImageCache(string name, string format, (int? Width, int? Height) maxSize, string watermark, bool exists)
+            public FakeTransformedImageCache(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark, bool exists)
             {
                 this.name = name;
                 this.format = format;
                 this.maxSize = maxSize;
                 this.watermark = watermark;
+                this.colour = colour;
                 this.exists = exists;
             }
 
             public bool ExistsCalled { get; set; } = false;
             public bool GetCalled { get; set; } = false;
             public bool SetCalled { get; set; } = false;
-            public bool Exists(string name, string format, (int? Width, int? Height) maxSize, string watermark)
+            public bool Exists(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
             {
                 ExistsCalled = true;
-                return this.exists && this.name == name && this.format == format && this.maxSize == maxSize && this.watermark == watermark;
+                return this.exists && this.name == name && this.format == format && this.maxSize == maxSize && this.colour == colour && this.watermark == watermark;
             }
 
-            public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string watermark)
+            public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
             {
                 GetCalled = true;
                 return new byte[0];
             }
 
-            public void Set(byte[] bytes, string name, string format, (int? Width, int? Height) maxSize, string watermark)
+            public void Set(byte[] bytes, string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
             {
                 SetCalled = true;
             }
@@ -191,12 +198,17 @@ namespace ImageServiceCore.Specs.Steps
             public void Set(string name, byte[] bytes)
             {
             }
+
+            public string[] List()
+            {
+                return new string[0];
+            }
         }
 
         class FakeImageTransformer : IImageTransformer
         {
             public bool TransformCalled { get; set; } = false;
-            public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string watermark)
+            public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
             {
                 TransformCalled = true;
                 return new byte[0];

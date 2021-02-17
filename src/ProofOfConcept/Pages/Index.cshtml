@@ -18,6 +18,9 @@
             <label for="imgFormat">Format: </label>
             <input id="imgFormat" type="text" oninput="updateImageLink()" placeholder="Enter image format" />
 
+            <label for="imgColour">Colour: </label>
+            <input id="imgColour" type="text" oninput="updateImageLink()" placeholder="Enter colour" />
+
             <label for="imgWatermark">Watermark: </label>
             <input id="imgWatermark" type="text" oninput="updateImageLink()" placeholder="Enter watermark" />
 
@@ -59,12 +62,14 @@
                     w: document.getElementById('imgMaxWidth').value,
                     h: document.getElementById('imgMaxHeight').value,
                     f: document.getElementById('imgFormat').value,
+                    c: document.getElementById('imgColour').value,
                     t: document.getElementById('imgWatermark').value
                 };
 
                 if (!params.w) delete params.w;
                 if (!params.h) delete params.h;
                 if (!params.f) delete params.f;
+                if (!params.c) delete params.c;
                 if (!params.t) delete params.t;
 
                 var esc = encodeURIComponent;

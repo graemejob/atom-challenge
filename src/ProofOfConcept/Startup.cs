@@ -70,11 +70,12 @@ namespace ProofOfConcept
             var name = context.Request.RouteValues["name"] as string;
             var maxWidth = context.Request.Query["w"].Select(s => (int?)int.Parse(s)).FirstOrDefault();
             var maxHeight = context.Request.Query["h"].Select(s => (int?)int.Parse(s)).FirstOrDefault();
+            var colour = context.Request.Query["c"].FirstOrDefault();
             var watermark = context.Request.Query["t"].FirstOrDefault();
             var format = context.Request.Query["f"].FirstOrDefault();
 
             var imageService = context.RequestServices.GetRequiredService<IImageService>();
-            var imageBytes = imageService.Get(name, format, (maxWidth, maxHeight), watermark);
+            var imageBytes = imageService.Get(name, format, (maxWidth, maxHeight), colour, watermark);
 
             if (imageBytes != null)
             {

@@ -16,8 +16,8 @@ namespace ImageServiceCore.Services
 
         public BitmapImageTransformer(ILogger<BitmapImageTransformer> logger)
         {
-            this.font = new Font(FontFamily.GenericSansSerif, 16F, FontStyle.Bold | FontStyle.Italic);
-            this.brush = new SolidBrush(Color.FromArgb(32, Color.Black));
+            this.font = new Font(FontFamily.GenericSansSerif, 64F, FontStyle.Regular, GraphicsUnit.Pixel);
+            this.brush = new SolidBrush(Color.FromArgb(64, Color.Black));
             this.logger = logger;
         }
 
@@ -27,49 +27,53 @@ namespace ImageServiceCore.Services
         /// <param name="bytes">Byte array containing the image file data</param>
         /// <param name="format">extension of the desired output format (eg "png", "jpeg", etc)</param>
         /// <param name="maxSize">Maximum width and/or height the returned image can have, or null if there is no width and/or height constraint</param>
+        /// <param name="colour">Optional colour background for image</param>
         /// <param name="watermark">Optional text to draw onto the image</param>
         /// <returns>Array of bytes representing the transformed image file</returns>
-        public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string watermark)
+        public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
         {
             var stopwatch = Stopwatch.StartNew();
 
             byte[] returnBytes = null;
 
-            using (var image = LoadImage(bytes))
+            var image = LoadImage(bytes);
+            
+            var currentImageFormat = image.RawFormat;
+            var newImageFormat = ParseImageFormatOrDefault(format) ?? currentImageFormat;
+            var currentDims = (image.Width, image.Height);
+            var newDims = CalculateNewDimensions((image.Width, image.Height), maxSize);
+
+            if (string.IsNullOrWhiteSpace(watermark) && string.IsNullOrWhiteSpace(colour) && newDims == currentDims && newImageFormat == currentImageFormat)
             {
-                var currentImageFormat = image.RawFormat;
-                var newImageFormat = ParseImageFormatOrDefault(format) ?? currentImageFormat;
-                var currentDims = (image.Width, image.Height);
-                var newDims = CalculateNewDimensions((image.Width, image.Height), maxSize);
-
-                if (string.IsNullOrWhiteSpace(watermark) && newDims == currentDims && newImageFormat == currentImageFormat)
-                {
-                    logger.LogTrace("No transformation required. Returning original image");
-                    // No transformation required
-                    returnBytes = bytes;
-                }
-                else
-                {
-                    if (!string.IsNullOrWhiteSpace(watermark))
-                    {
-                        logger.LogTrace("Drawing watermark");
-                        DrawWatermark(watermark, image);
-                    }
-
-                    if (newDims != currentDims)
-                    {
-                        logger.LogTrace("Resizing image");
-                        using (var resizedImage = ResizeImage(image, newDims))
-                        {
-                            returnBytes = SaveImageToByteArray(resizedImage, newImageFormat);
-                        }
-                    }
-                    else
-                    {
-                        returnBytes = SaveImageToByteArray(image, newImageFormat);
-                    }
-                }
+                logger.LogTrace("No transformation required. Returning original image");
+                // No transformation required
+                returnBytes = bytes;
             }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(colour))
+                {
+                    logger.LogTrace("Colouring background");
+                    image = ColourBackground(colour, image);
+                }
+
+                if (!string.IsNullOrWhiteSpace(watermark))
+                {
+                    logger.LogTrace("Drawing watermark");
+                    DrawWatermark(watermark, image);
+                }
+
+                if (newDims != currentDims)
+                {
+                    logger.LogTrace("Resizing image");
+                    image = ResizeImage(image, newDims);
+                }
+
+                returnBytes = SaveImageToByteArray(image, newImageFormat);
+                
+            }
+            image.Dispose();
+
             logger.LogInformation($"Transformed image in {stopwatch.ElapsedMilliseconds} ms");
             
             return returnBytes;
@@ -83,6 +87,20 @@ namespace ImageServiceCore.Services
                 var bitmap = Bitmap.FromStream(inputStream);
                 return bitmap;
             }
+        }
+
+        // Colour background
+        private Image ColourBackground(string colour, Image image)
+        {
+            var newImage = new Bitmap(image.Width, image.Height, image.PixelFormat);
+            using (var g = CreateGraphics(newImage))
+            {
+                g.Clear(ColorTranslator.FromHtml(colour));
+
+                g.DrawImage(image, 0, 0, image.Width, image.Height);
+            }
+            image.Dispose();
+            return newImage;
         }
 
         // Draw watermark text on image
@@ -107,6 +125,7 @@ namespace ImageServiceCore.Services
             {
                 graphics.DrawImage(image, 0, 0, newDims.Width, newDims.Height);
             }
+            image.Dispose();
             return resizedBitmap;
             
         }
@@ -142,7 +161,7 @@ namespace ImageServiceCore.Services
             graphics.CompositingQuality = CompositingQuality.HighQuality;
             graphics.SmoothingMode = SmoothingMode.HighQuality;
             graphics.CompositingMode = CompositingMode.SourceOver;
-            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
             return graphics;
         }
 

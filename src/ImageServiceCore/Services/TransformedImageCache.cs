@@ -21,9 +21,9 @@ namespace ImageServiceCore.Services
         /// <param name="format">Format of the transformed image</param>
         /// <param name="maxSize">Max width and/or height of the transformed image</param>
         /// <param name="watermark">Overlay text</param>
-        public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string watermark)
+        public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
         {
-            var filename = GenerateFileName(name, format, maxSize, watermark);
+            var filename = GenerateFileName(name, format, maxSize, colour, watermark);
             return blobStorage.Get(filename);
         }
 
@@ -34,9 +34,9 @@ namespace ImageServiceCore.Services
         /// <param name="format">Format of the transformed image</param>
         /// <param name="maxSize">Max width and/or height of the transformed image</param>
         /// <param name="watermark">Overlay text</param>
-        public void Set(byte[] bytes, string name, string format, (int? Width, int? Height) maxSize, string watermark)
+        public void Set(byte[] bytes, string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
         {
-            var filename = GenerateFileName(name, format, maxSize, watermark);
+            var filename = GenerateFileName(name, format, maxSize, colour, watermark);
             blobStorage.Set(filename, bytes);
         }
 
@@ -48,14 +48,14 @@ namespace ImageServiceCore.Services
         /// <param name="maxSize">Max width and/or height of the transformed image</param>
         /// <param name="watermark">Overlay text</param>
         /// <returns>true if transformed image exists in cache</returns>
-        public bool Exists(string name, string format, (int? Width, int? Height) maxSize, string watermark)
+        public bool Exists(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
         {
-            var filename = GenerateFileName(name, format, maxSize, watermark);
+            var filename = GenerateFileName(name, format, maxSize, colour, watermark);
             return blobStorage.Exists(filename);
         }
 
         // Generate a filename which is unique to the original image, and the requested transform
-        private string GenerateFileName(string name, string format, (int? Width, int? Height) maxSize, string watermark)
+        private string GenerateFileName(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(name);
@@ -64,6 +64,7 @@ namespace ImageServiceCore.Services
                 sb.Append("!");
                 if (maxSize.Width.HasValue) sb.Append($"w{maxSize.Width.Value}");
                 if (maxSize.Height.HasValue) sb.Append($"h{maxSize.Height.Value}");
+                if (!string.IsNullOrWhiteSpace(colour)) sb.Append($"c{colour}");
                 if (!string.IsNullOrWhiteSpace(watermark)) sb.Append($"t{EncodeWatermark(watermark)}");
                 if (!string.IsNullOrEmpty(format)) sb.Append($".{format}");
                 else sb.Append(Path.GetExtension(name));

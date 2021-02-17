@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
 using ImageServiceCore.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -19,7 +21,7 @@ namespace ImageServiceCore.Specs.Steps
         }
 
         private byte[] originalImageBytes;
-        private ((int? Width, int? Height) MaxSize, string Format, string Watermark) request;
+        private ((int? Width, int? Height) MaxSize, string Format, string Colour, string Watermark) request;
         private byte[] outputImageBytes;
         private Image outputImage;
 
@@ -66,13 +68,16 @@ namespace ImageServiceCore.Specs.Steps
         [Given(@"we request the watermark is '(.*)'")]
         public void GivenWeRequestTheWatermarkIs(string watermark) => request.Watermark = watermark;
 
+        [Given(@"we request the background colour is '(.*)'")]
+        public void GivenWeRequestTheBackgroundColourIs(string colour) => request.Colour = colour;
+
         // Whens
 
         [When(@"we make the transformation request")]
         public void WhenWeMakeTheTransformationRequest()
         {
-            var service = new BitmapImageTransformer();
-            outputImageBytes = service.Transform(originalImageBytes, request.Format, request.MaxSize, request.Watermark);
+            var service = new BitmapImageTransformer(NullLogger<BitmapImageTransformer>.Instance);
+            outputImageBytes = service.Transform(originalImageBytes, request.Format, request.MaxSize, request.Colour, request.Watermark);
             using (var ms = new MemoryStream(outputImageBytes))
             {
                 outputImage = new Bitmap(ms);
