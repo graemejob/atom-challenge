@@ -14,11 +14,12 @@ After the bang, the following parameters may be specified in any order, and they
 * t<Text>   Watermark text, eg 'tAtom Supplies' will draw a faint caption in the bottom right corner of the image before resizing. Text can be as long as you want, and will wrap to take up the whole image if necessary.
 
 Some examples:
-"/images/foo.png" will serve the original image and not cache it.
-"/images/foo.png!.jpg" will serve a jpeg of the original image and cache it.
-"/images/foo.png!w64.png" will serve the original image, resized so that it will fit in 64x* pixels, and will cache it.
-"/images/foo.png!w64_h64.jpg" will serve a jpeg of the original image, resized so that it will fit in 64x64 pixels, and will cache it.
-"/images/foo.png!h64_bRed_tAtom.jpg" will serve a jpeg of the original image, resized so that it will fit in *x64 pixels, with a red background and "Atom" written in the bottom-right corner, and will cache it.
+
+* "/images/foo.png" will serve the original image and not cache it.
+* "/images/foo.png!.jpg" will serve a jpeg of the original image and cache it.
+* "/images/foo.png!w64.png" will serve the original image, resized so that it will fit in 64x* pixels, and will cache it.
+* "/images/foo.png!w64_h64.jpg" will serve a jpeg of the original image, resized so that it will fit in 64x64 pixels, and will cache it.
+* "/images/foo.png!h64_bRed_tAtom.jpg" will serve a jpeg of the original image, resized so that it will fit in *x64 pixels, with a red background and "Atom" written in the bottom-right corner, and will cache it.
 
 ## Scalability
 
@@ -39,5 +40,11 @@ This solution utilises 3 levels of caching
 ## Optimising load performance
 
 It might be desireable to offload the image processing onto another server to keep CPU usage down on the web servers, and that can be accomplished by creating either an API  endpoint or a RabbitMQ Remote Procedure Call, and calling to it from a new implementation of IImageTransformer, just responsible for image processing and host that on its own scalable host. That would reduce the number of web endpoints needed to keep up with traffic requesting cached images. I have not explored this for this challenge.
+
+
+## Endnote
+
+Would I recommend that a company build an image server like this to serve their images? No. Absolutely not. There are plenty of CDNs with capabilities far beyond anything that's worth maintaining in-house. Azure actually have image processing capability exactly as required in this challenge. Unfortunately, it seems that capability is only available in the China region, for some reason.
+https://docs.azure.cn/en-us/cdn/cdn-image-processing
 
 
