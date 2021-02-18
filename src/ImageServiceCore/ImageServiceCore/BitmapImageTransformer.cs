@@ -1,13 +1,11 @@
-﻿using ImageServiceCore.ImageServiceRequestConverter;
-using ImageServiceCore.Interfaces;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 
-namespace ImageServiceCore.Services
+namespace ImageServiceCore.ImageServiceCore
 {
     public class BitmapImageTransformer : IImageTransformer
     {
@@ -17,8 +15,8 @@ namespace ImageServiceCore.Services
 
         public BitmapImageTransformer(ILogger<BitmapImageTransformer> logger)
         {
-            this.font = new Font(FontFamily.GenericSansSerif, 64F, FontStyle.Regular, GraphicsUnit.Pixel);
-            this.brush = new SolidBrush(Color.FromArgb(64, Color.Black));
+            font = new Font(FontFamily.GenericSansSerif, 64F, FontStyle.Regular, GraphicsUnit.Pixel);
+            brush = new SolidBrush(Color.FromArgb(64, Color.Black));
             this.logger = logger;
         }
 
@@ -28,21 +26,21 @@ namespace ImageServiceCore.Services
         /// <param name="bytes">Byte array containing the image file data</param>
         /// <param name="request">Image transformation parameters</param>
         /// <returns>Array of bytes representing the transformed image file</returns>
-        public byte[] Transform(byte[] bytes, ImageTransformationRequest request)
+        public byte[] Transform(byte[] bytes, ImageTransformationModel request)
         {
             var stopwatch = Stopwatch.StartNew();
 
             byte[] returnBytes;
 
             var image = LoadImage(bytes);
-            
+
             var currentImageFormat = image.RawFormat;
             var newImageFormat = ParseImageFormatOrDefault(request.Format) ?? currentImageFormat;
             var currentDims = (image.Width, image.Height);
             var maxDims = (request.MaxWidth, request.MaxHeight);
             var newDims = CalculateNewDimensions(currentDims, maxDims);
 
-            if (string.IsNullOrWhiteSpace(request.Watermark) && string.IsNullOrWhiteSpace(request.Colour) && newDims == currentDims && newImageFormat == currentImageFormat)
+            if (string.IsNullOrWhiteSpace(request.Watermark) && string.IsNullOrWhiteSpace(request.BackgroundColour) && newDims == currentDims && newImageFormat == currentImageFormat)
             {
                 logger.LogTrace("No transformation required. Returning original image");
                 // No transformation required
@@ -50,10 +48,10 @@ namespace ImageServiceCore.Services
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(request.Colour))
+                if (!string.IsNullOrWhiteSpace(request.BackgroundColour))
                 {
                     logger.LogTrace("Colouring background");
-                    image = ColourBackground(request.Colour, image);
+                    image = ColourBackground(request.BackgroundColour, image);
                 }
 
                 if (!string.IsNullOrWhiteSpace(request.Watermark))
@@ -69,12 +67,12 @@ namespace ImageServiceCore.Services
                 }
 
                 returnBytes = SaveImageToByteArray(image, newImageFormat);
-                
+
             }
             image.Dispose();
 
             logger.LogInformation($"Transformed image in {stopwatch.ElapsedMilliseconds} ms");
-            
+
             return returnBytes;
         }
 
@@ -83,7 +81,7 @@ namespace ImageServiceCore.Services
         {
             using (MemoryStream inputStream = new MemoryStream(bytes))
             {
-                var bitmap = Bitmap.FromStream(inputStream);
+                var bitmap = Image.FromStream(inputStream);
                 return bitmap;
             }
         }
@@ -110,7 +108,7 @@ namespace ImageServiceCore.Services
                 // Calculate position of text if bottom-right of image
                 var strBounds = graphics.MeasureString(watermark, font, new SizeF(image.Width, image.Height), new StringFormat());
                 var strLayoutRect = new RectangleF(image.Width - strBounds.Width, image.Height - strBounds.Height, strBounds.Width, strBounds.Height);
-                
+
                 graphics.DrawString(watermark, font, brush, strLayoutRect);
             }
         }
@@ -119,14 +117,14 @@ namespace ImageServiceCore.Services
         private Image ResizeImage(Image image, (int Width, int Height) newDims)
         {
             var resizedBitmap = new Bitmap(newDims.Width, newDims.Height, image.PixelFormat);
-            
+
             using (var graphics = CreateGraphics(resizedBitmap))
             {
                 graphics.DrawImage(image, 0, 0, newDims.Width, newDims.Height);
             }
             image.Dispose();
             return resizedBitmap;
-            
+
         }
 
         // Save image object to byte array

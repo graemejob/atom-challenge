@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
-using ImageServiceCore.ImageServiceRequestConverter;
-using ImageServiceCore.Interfaces;
-using ImageServiceCore.Services;
+using ImageServiceCore.BlobStorage;
+using ImageServiceCore.ImageServiceCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Threading;
@@ -142,25 +141,25 @@ namespace ImageServiceCore.Specs.Steps
             public bool ExistsCalled { get; set; } = false;
             public bool GetCalled { get; set; } = false;
             public bool SetCalled { get; set; } = false;
-            public bool Exists(ImageTransformationRequest request)
+            public bool Exists(ImageTransformationModel request)
             {
                 ExistsCalled = true;
                 return this.exists;
             }
 
-            public byte[] Get(ImageTransformationRequest request)
+            public byte[] Get(ImageTransformationModel request)
             {
                 GetCalled = true;
                 return new byte[0];
             }
 
-            public void Set(byte[] bytes, ImageTransformationRequest request)
+            public void Set(byte[] bytes, ImageTransformationModel request)
             {
                 SetCalled = true;
             }
         }
 
-        class FakeImageBlobStorage : IImageBlobStorage
+        class FakeImageBlobStorage : IOriginalImageBlobStorage
         {
             private readonly bool exists;
 
@@ -197,7 +196,7 @@ namespace ImageServiceCore.Specs.Steps
         class FakeImageTransformer : IImageTransformer
         {
             public bool TransformCalled { get; set; } = false;
-            public byte[] Transform(byte[] bytes, ImageTransformationRequest request)
+            public byte[] Transform(byte[] bytes, ImageTransformationModel request)
             {
                 TransformCalled = true;
                 return new byte[0];

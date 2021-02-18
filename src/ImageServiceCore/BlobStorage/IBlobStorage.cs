@@ -1,4 +1,4 @@
-﻿namespace ImageServiceCore.Interfaces
+﻿namespace ImageServiceCore.BlobStorage
 {
     public interface IBlobStorage
     {

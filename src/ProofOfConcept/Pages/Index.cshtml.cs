@@ -1,13 +1,13 @@
-using ImageServiceCore.Interfaces;
+using ImageServiceCore.BlobStorage;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ProofOfConcept.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly IImageBlobStorage imageBlobStorage;
+        private readonly IOriginalImageBlobStorage imageBlobStorage;
 
-        public IndexModel(IImageBlobStorage imageBlobStorage)
+        public IndexModel(IOriginalImageBlobStorage imageBlobStorage)
         {
             this.imageBlobStorage = imageBlobStorage;
         }

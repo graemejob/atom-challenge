@@ -1,9 +1,9 @@
-﻿using ImageServiceCore.Interfaces;
+﻿using ImageServiceCore.BlobStorage;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
 
-namespace ImageServiceCore.Services
+namespace ImageServiceCore.BlobStorage.FileSystemStorage
 {
     public class FileStorage : IBlobStorage
     {

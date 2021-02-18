@@ -1,5 +1,7 @@
-﻿using ImageServiceCore.Interfaces;
-using ImageServiceCore.Services;
+﻿using ImageServiceCore.BlobStorage;
+using ImageServiceCore.BlobStorage.FileSystemStorage;
+using ImageServiceCore.ImageServiceCore;
+using ImageServiceCore.ImageServiceRequestConverter;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,7 +12,7 @@ namespace ImageServiceCore.Extensions
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Register Image Service
+        /// Register core Image Service
         /// </summary>
         public static IServiceCollection AddImageService(this IServiceCollection services)
         {
@@ -20,9 +22,9 @@ namespace ImageServiceCore.Extensions
         }
 
         /// <summary>
-        /// Register local file storage for images and cache
+        /// Register file system storage for images and cache
         /// </summary>
-        public static IServiceCollection AddImageServiceLocalFileStorage(this IServiceCollection services)
+        public static IServiceCollection AddImageServiceFileSystemStorage(this IServiceCollection services)
         {
             FileStorage.Options GetConfig(IServiceProvider serviceProvider, string key) => 
                 serviceProvider.GetRequiredService<IConfiguration>().GetSection(key).Get<FileStorage.Options>();
@@ -31,14 +33,14 @@ namespace ImageServiceCore.Extensions
                 serviceProvider.GetRequiredService<ILogger<T>>();
 
             return services
-                .AddTransient<IImageBlobStorage>(o => 
-                    new ImageFileStorage(GetConfig(o, "ImageFileStorage"), GetLogger<ImageFileStorage>(o)))
-                .AddTransient<ICacheBlobStorage>(o => 
-                    new CacheFileStorage(GetConfig(o, "CacheFileStorage"), GetLogger<CacheFileStorage>(o)));
+                .AddTransient<IOriginalImageBlobStorage>(o => 
+                    new OriginalImageFileStorage(GetConfig(o, "ImageFileStorage"), GetLogger<OriginalImageFileStorage>(o)))
+                .AddTransient<ICachedTransformBlobStorage>(o => 
+                    new CachedTransformFileStorage(GetConfig(o, "CacheFileStorage"), GetLogger<CachedTransformFileStorage>(o)));
         }
 
         /// <summary>
-        /// Register BitmapImageTransformer as the transform strategy
+        /// Register image transformation strategy that uses System.Drawing.Bitmap and Graphics to perform image processing
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
@@ -46,6 +48,17 @@ namespace ImageServiceCore.Extensions
         {
             return services
                 .AddTransient<IImageTransformer, BitmapImageTransformer>();
+        }
+
+        /// <summary>
+        /// Register the default transformation naming convention converter
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddImageTransformationNamingConvention(this IServiceCollection services)
+        {
+            return services
+                .AddTransient<IEncodedStringImageTransformationRequestConverter, EncodedStringImageTransformationRequestConverterV1>();
         }
     }
 }

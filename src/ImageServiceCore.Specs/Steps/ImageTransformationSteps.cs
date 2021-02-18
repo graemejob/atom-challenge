@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
-using ImageServiceCore.ImageServiceRequestConverter;
-using ImageServiceCore.Services;
+using ImageServiceCore.ImageServiceCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
@@ -17,7 +16,7 @@ namespace ImageServiceCore.Specs.Steps
         private readonly ScenarioContext scenarioContext;
 
         private byte[] originalImageBytes;
-        private ImageTransformationRequest request;
+        private ImageTransformationModel request;
         private byte[] outputImageBytes;
         private Image outputImage;
 
@@ -71,7 +70,7 @@ namespace ImageServiceCore.Specs.Steps
         public void GivenWeRequestTheWatermarkIs(string watermark) => request.Watermark = watermark;
 
         [Given(@"we request the background colour is '(.*)'")]
-        public void GivenWeRequestTheBackgroundColourIs(string colour) => request.Colour = colour;
+        public void GivenWeRequestTheBackgroundColourIs(string colour) => request.BackgroundColour = colour;
 
         // Whens
 

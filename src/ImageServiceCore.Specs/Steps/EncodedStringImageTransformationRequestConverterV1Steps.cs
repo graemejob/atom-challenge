@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using ImageServiceCore.ImageServiceCore;
 using ImageServiceCore.ImageServiceRequestConverter;
 using System;
 using TechTalk.SpecFlow;
@@ -8,11 +9,11 @@ namespace ImageServiceCore.Specs.Steps
     [Binding]
     public class EncodedStringImageTransformationRequestConverterV1Steps
     {
-        ImageTransformationRequest inputRequest = new ImageTransformationRequest();
+        ImageTransformationModel inputRequest = new ImageTransformationModel();
         string outputEncodedString = null;
 
         string inputEncodedString = null;
-        ImageTransformationRequest outputRequest = new ImageTransformationRequest();
+        ImageTransformationModel outputRequest = new ImageTransformationModel();
         
 
         [Given(@"Request\.Name is '(.*)'")]
@@ -28,7 +29,7 @@ namespace ImageServiceCore.Specs.Steps
         public void GivenRequest_MaxSize_HeightIs(int maxHeight) => inputRequest.MaxHeight = maxHeight;
 
         [Given(@"Request\.Colour is '(.*)'")]
-        public void GivenRequest_ColourIs(string colour) => inputRequest.Colour = colour;
+        public void GivenRequest_ColourIs(string colour) => inputRequest.BackgroundColour = colour;
         
         [Given(@"Request\.Watermark is '(.*)'")]
         public void GivenRequest_WatermarkIs(string watermark) => inputRequest.Watermark = watermark;
@@ -65,8 +66,8 @@ namespace ImageServiceCore.Specs.Steps
         [Then(@"Request\.MaxSize\.Height is (.*)")] public void ThenRequest_MaxSize_HeightIs(int maxHeight) => outputRequest.MaxHeight.Should().Be(maxHeight);
         [Then(@"Request\.MaxSize\.Height is empty")] public void ThenRequest_MaxSize_HeightIsEmpty() => outputRequest.MaxHeight.Should().BeNull();
 
-        [Then(@"Request\.Colour is '(.*)'")] public void ThenRequest_ColourIs(string colour) => outputRequest.Colour.Should().Be(colour);
-        [Then(@"Request\.Colour is empty")] public void ThenRequest_ColourIsEmpty() => outputRequest.Colour.Should().BeNull();
+        [Then(@"Request\.Colour is '(.*)'")] public void ThenRequest_ColourIs(string colour) => outputRequest.BackgroundColour.Should().Be(colour);
+        [Then(@"Request\.Colour is empty")] public void ThenRequest_ColourIsEmpty() => outputRequest.BackgroundColour.Should().BeNull();
 
         [Then(@"Request\.Watermark is '(.*)'")] public void ThenRequest_WatermarkIs(string watermark) => outputRequest.Watermark.Should().Be(watermark);
         [Then(@"Request\.Watermark is empty")] public void ThenRequest_WatermarkIsEmpty() => outputRequest.Watermark.Should().BeNull();

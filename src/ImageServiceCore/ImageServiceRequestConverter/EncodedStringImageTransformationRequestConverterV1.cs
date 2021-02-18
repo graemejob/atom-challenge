@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ImageServiceCore.ImageServiceCore;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,10 @@ namespace ImageServiceCore.ImageServiceRequestConverter
     /// </summary>
     public class EncodedStringImageTransformationRequestConverterV1 : IEncodedStringImageTransformationRequestConverter
     {
-        public ImageTransformationRequest ConvertFrom(string encodedString)
+        /// <summary>
+        /// Deserialise encoded string / filename into ImageTransformationRequest
+        /// </summary>
+        public ImageTransformationModel ConvertFrom(string encodedString)
         {
             var lastBang = encodedString.LastIndexOf('!');
             if (lastBang == -1) return NoTransfomration(encodedString);
@@ -39,16 +43,20 @@ namespace ImageServiceCore.ImageServiceRequestConverter
             return new(name, format, maxWidth, maxHeight, colour, watermark);
         }
 
-        private ImageTransformationRequest NoTransfomration(string name)
+        private ImageTransformationModel NoTransfomration(string name)
         {
             return new(name, null, null, null, null, null);
         }
-        public string ConvertTo(ImageTransformationRequest source)
+
+        /// <summary>
+        /// Serialize ImageTransformationRequest into encoded string / filename
+        /// </summary>
+        public string ConvertTo(ImageTransformationModel source)
         {
             var parameters = new[] {
                 ("w", source.MaxWidth?.ToString()),
                 ("h", source.MaxHeight?.ToString()),
-                ("b", source.Colour),
+                ("b", source.BackgroundColour),
                 ("t", source.Watermark)
             }.Where(p => p.Item2 != null).ToArray();
 

@@ -1,5 +1,4 @@
 using ImageServiceCore.Extensions;
-using ImageServiceCore.ImageServiceRequestConverter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,10 +16,11 @@ namespace ProofOfConcept
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddImageService();
-            services.AddImageServiceLocalFileStorage();
+            services.AddImageServiceFileSystemStorage();
             services.AddBitmapImageTransformer();
-            
-            services.AddTransient<IEncodedStringImageTransformationRequestConverter, EncodedStringImageTransformationRequestConverterV1>();
+            services.AddImageTransformationNamingConvention();
+
+
             services.AddRazorPages();
             services.AddResponseCaching(options =>
             {
@@ -44,6 +44,8 @@ namespace ProofOfConcept
                 app.UseHsts();
             }
             app.UseRouting();
+
+            // Use ASP.Net caching middleware 
             app.UseResponseCaching();
 
             app.Use(async (context, next) => {
@@ -59,6 +61,7 @@ namespace ProofOfConcept
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                // Add image service endpoint middleware
                 endpoints.MapImageServiceEndpoint("/images/");
             });
         }

@@ -1,5 +1,5 @@
-﻿using ImageServiceCore.ImageServiceRequestConverter;
-using ImageServiceCore.Interfaces;
+﻿using ImageServiceCore.ImageServiceCore;
+using ImageServiceCore.ImageServiceRequestConverter;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System.IO;

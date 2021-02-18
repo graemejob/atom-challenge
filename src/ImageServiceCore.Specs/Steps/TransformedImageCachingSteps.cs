@@ -1,8 +1,7 @@
 ﻿using FluentAssertions;
+using ImageServiceCore.BlobStorage;
+using ImageServiceCore.ImageServiceCore;
 using ImageServiceCore.ImageServiceRequestConverter;
-using ImageServiceCore.Interfaces;
-using ImageServiceCore.Services;
-using System;
 using TechTalk.SpecFlow;
 
 namespace ImageServiceCore.Specs.Steps
@@ -43,12 +42,12 @@ namespace ImageServiceCore.Specs.Steps
             {
                 this.outputEncodedString = outputEncodedString;
             }
-            public ImageTransformationRequest ConvertFrom(string source) => null;
+            public ImageTransformationModel ConvertFrom(string source) => null;
 
-            public string ConvertTo(ImageTransformationRequest source) => outputEncodedString;
+            public string ConvertTo(ImageTransformationModel source) => outputEncodedString;
         }
 
-        class FakeCacheStorage : ICacheBlobStorage
+        class FakeCacheStorage : ICachedTransformBlobStorage
         {
             public string NameParameter { get; private set; }
             public bool ExistsReturns { get; set; }
