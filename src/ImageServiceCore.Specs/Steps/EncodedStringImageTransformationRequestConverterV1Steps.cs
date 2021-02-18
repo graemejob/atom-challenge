@@ -53,22 +53,22 @@ namespace ImageServiceCore.Specs.Steps
         [Then(@"the resulting converted string is '(.*)'")]
         public void ThenTheResultingConvertedStringIs(string encodedString) => outputEncodedString.Should().Be(encodedString);
 
-        [Then(@"Request\.Name is '(.*)'")]
-        public void ThenRequest_NameIs(string name) => outputRequest.Name.Should().Be(name);
-        
-        [Then(@"Request\.Format is (.*)")]
-        public void ThenRequest_FormatIs(string format) => outputRequest.Format.Should().Be(format);
-        
-        [Then(@"Request\.MaxSize\.Width is (.*)")]
-        public void ThenRequest_MaxSize_WidthIs(int maxWidth) => outputRequest.MaxWidth.Should().Be(maxWidth);
-        
-        [Then(@"Request\.MaxSize\.Height is (.*)")]
-        public void ThenRequest_MaxSize_HeightIs(int maxHeight) => outputRequest.MaxHeight.Should().Be(maxHeight);
-        
-        [Then(@"Request\.Colour is '(.*)'")]
-        public void ThenRequest_ColourIs(string colour) => outputRequest.Colour.Should().Be(colour);
-        
-        [Then(@"Request\.Watermark is '(.*)'")]
-        public void ThenRequest_WatermarkIs(string watermark) => outputRequest.Watermark.Should().Be(watermark);
+        [Then(@"Request\.Name is '(.*)'")] public void ThenRequest_NameIs(string name) => outputRequest.Name.Should().Be(name);
+        [Then(@"Request\.Name is empty")] public void ThenRequest_NameIsEmpty() => outputRequest.Name.Should().BeNull();
+
+        [Then(@"Request\.Format is '(.*)'")] public void ThenRequest_FormatIs(string format) => outputRequest.Format.Should().Be(format);
+        [Then(@"Request\.Format is empty")] public void ThenRequest_FormatIsEmpty() => outputRequest.Format.Should().BeNull();
+
+        [Then(@"Request\.MaxSize\.Width is (.*)")] public void ThenRequest_MaxSize_WidthIs(int maxWidth) => outputRequest.MaxWidth.Should().Be(maxWidth);
+        [Then(@"Request\.MaxSize\.Width is empty")] public void ThenRequest_MaxSize_WidthIsEmpty() => outputRequest.MaxWidth.Should().BeNull();
+
+        [Then(@"Request\.MaxSize\.Height is (.*)")] public void ThenRequest_MaxSize_HeightIs(int maxHeight) => outputRequest.MaxHeight.Should().Be(maxHeight);
+        [Then(@"Request\.MaxSize\.Height is empty")] public void ThenRequest_MaxSize_HeightIsEmpty() => outputRequest.MaxHeight.Should().BeNull();
+
+        [Then(@"Request\.Colour is '(.*)'")] public void ThenRequest_ColourIs(string colour) => outputRequest.Colour.Should().Be(colour);
+        [Then(@"Request\.Colour is empty")] public void ThenRequest_ColourIsEmpty() => outputRequest.Colour.Should().BeNull();
+
+        [Then(@"Request\.Watermark is '(.*)'")] public void ThenRequest_WatermarkIs(string watermark) => outputRequest.Watermark.Should().Be(watermark);
+        [Then(@"Request\.Watermark is empty")] public void ThenRequest_WatermarkIsEmpty() => outputRequest.Watermark.Should().BeNull();
     }
 }

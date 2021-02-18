@@ -22,9 +22,12 @@ namespace ImageServiceCore.ImageServiceRequestConverter
             var name = encodedString[..lastBang];
             var format = encodedString[(lastDot + 1)..];
 
-            if (format.Equals(Path.GetExtension(name), System.StringComparison.OrdinalIgnoreCase)) format = null;
+            if (format.Equals(Path.GetExtension(name)[1..], System.StringComparison.OrdinalIgnoreCase)) format = null;
+            var parametersPart = encodedString[(lastBang + 1)..lastDot];
 
-            var parameters = encodedString[(lastBang + 1)..lastDot].Split('_').ToDictionary(k => k[..1], v => v[1..]);
+            var parameters = string.IsNullOrEmpty(parametersPart) 
+                ? new Dictionary<string, string>() 
+                : parametersPart.Split('_').ToDictionary(k => k[..1], v => v[1..]);
 
             int? toNullableInt(string str) { int value; return int.TryParse(str, out value) ? value : null; }
 
@@ -56,7 +59,7 @@ namespace ImageServiceCore.ImageServiceRequestConverter
                 sb.Append('!');
                 sb.Append(string.Join('_', parameters.Select(s => s.Item1 + s.Item2)));
                 sb.Append('.');
-                sb.Append(source.Format ?? Path.GetExtension(source.Name));
+                sb.Append(source.Format ?? Path.GetExtension(source.Name)[1..]);
             }
             return sb.ToString();
         }
