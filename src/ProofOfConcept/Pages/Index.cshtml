@@ -1,10 +1,10 @@
 ﻿@page
 @model ProofOfConcept.Pages.IndexModel
     <html>
-    <head><title>Image transform console</title>
+    <head><title>Dirty hacky Image transform dashboard</title>
     </head>
     <body>
-
+        <h1 style="display: inline-block">Dirty Hacky Image Transform Dashboard</h1><i>Please don't judge this...</i>
         <div style="position: fixed; overflow: hidden;">
             <label for="imgName">Name: </label>
             <input id="imgName" type="text" oninput="updateImageLink()" placeholder="Enter image name" />
@@ -28,7 +28,7 @@
             <a href="#" onclick="setBackground(); return false;">Set Background</a>|
             <a href="#" onclick="openNewTab(); return false;">Open in New Tab</a>
         </div>
-        <div style="position: fixed; top: 8em; bottom: 0; left: 0; right: 0; overflow-y: scroll;">
+        <div style="position: fixed; top: 12em; bottom: 0; left: 0; right: 0; overflow-y: scroll;">
             @if ((Model?.Items ?? new string[0]).Length > 0)
             {
                 <h3>@Model.Items.Length items in source folder \atom-challence\images</h3>
@@ -55,7 +55,7 @@
             function updateImageLink() {
 
                 var imageLink = "images/";
-                var imageFilename = document.getElementById('imgName').value;
+                var imageFilename = encodeURIComponent(document.getElementById('imgName').value);
                 imageLink += imageFilename;
 
                 var params = {
@@ -86,18 +86,18 @@
             function setBackground() {
 
                 var imageLink = document.getElementById('imageLink').innerText;
-                document.body.style.backgroundImage = "url('" + imageLink + "')";
+                document.body.style.backgroundImage = 'url("' + imageLink + '")';
                 document.body.style.backgroundRepeat = "no-repeat";
                 document.body.style.backgroundPosition = "center";
                 document.body.style.backgroundAttachment = "fixed";
-
-                //document.body.style.background = "url('img_tree.gif') no-repeat center fixed";
             }
 
             function openNewTab() {
 
-                var imageLink = document.getElementById('imageLink').innerText;
-                window.open(imageLink);
+                const imageLink = document.getElementById('imageLink').innerText;
+                const img = '<img src="' + imageLink + '">';
+                const newTab = window.open();
+                newTab.document.write(img);
             }
         </script>
 </body>
