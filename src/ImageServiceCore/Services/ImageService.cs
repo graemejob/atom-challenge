@@ -1,4 +1,5 @@
-﻿using ImageServiceCore.Interfaces;
+﻿using ImageServiceCore.ImageServiceRequestConverter;
+using ImageServiceCore.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -28,46 +29,50 @@ namespace ImageServiceCore.Services
         /// <param name="colour">Optional background colour</param>
         /// <param name="watermark">Optional text to draw onto the image</param>
         /// <returns>Bytes represenging the requested image file</returns>
-        public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
+        public byte[] Get(ImageTransformationRequest request)
         {
-            if (string.IsNullOrEmpty(format) && !maxSize.Width.HasValue && !maxSize.Height.HasValue && string.IsNullOrWhiteSpace(watermark) && string.IsNullOrWhiteSpace(colour))
+            if (string.IsNullOrEmpty(request.Format) &&
+                !request.MaxWidth.HasValue &&
+                !request.MaxHeight.HasValue &&
+                string.IsNullOrWhiteSpace(request.Watermark) &&
+                string.IsNullOrWhiteSpace(request.Colour))
             {
                 // No transformation requested. Return original image, and don't cache.
-                if (!imageBlobStorage.Exists(name))
+                if (!imageBlobStorage.Exists(request.Name))
                 {
-                    logger.LogInformation($"{name} does not exist");
+                    logger.LogInformation($"{request.Name} does not exist");
                     return null;
                 }
-                logger.LogInformation($"{name} requested without transformation. Serving original image");
-                return imageBlobStorage.Get(name);
+                logger.LogInformation($"{request.Name} requested without transformation. Serving original image");
+                return imageBlobStorage.Get(request.Name);
             }
-            if (imageCache.Exists(name, format, maxSize, colour, watermark))
+            if (imageCache.Exists(request))
             {
-                logger.LogInformation($"{name} {format} {maxSize.Width}x{maxSize.Height} exists in cache. Serving from cache");
+                logger.LogInformation($"{request.Name} {request.Format} {request.MaxWidth}x{request.MaxHeight} exists in cache. Serving from cache");
                 // Transformation exists in cache storage. Return image
-                return imageCache.Get(name, format, maxSize, colour, watermark);
+                return imageCache.Get(request);
             }
             else
             {
-                if (!imageBlobStorage.Exists(name))
+                if (!imageBlobStorage.Exists(request.Name))
                 {
-                    logger.LogInformation($"{name} does not exist");
+                    logger.LogInformation($"{request.Name} does not exist");
                     return null;
                 }
                 // Image exists, but not the requested transform. Transform image.
-                var imageBytes = imageBlobStorage.Get(name);
+                var imageBytes = imageBlobStorage.Get(request.Name);
 
-                var transformedImageBytes = imageTransformer.Transform(imageBytes, format, maxSize, colour, watermark);
+                var transformedImageBytes = imageTransformer.Transform(imageBytes, request);
 
                 Task.Run(() =>
                 {
                     // We shouldn't wait for the image to be saved to cache before returning the image to the requester
-                    imageCache.Set(transformedImageBytes, name, format, maxSize, colour, watermark);
-                    logger.LogInformation($"Saving {name} {format} {maxSize.Width}x{maxSize.Height} in cache");
+                    imageCache.Set(transformedImageBytes, request);
+                    logger.LogInformation($"Saving {request.Name} {request.Format} {request.MaxWidth}x{request.MaxHeight} in cache");
 
                 }).ConfigureAwait(false);
 
-                logger.LogInformation($"{name} {format} {maxSize.Width}x{maxSize.Height} has been processed. Served from transformer");
+                logger.LogInformation($"{request.Name} {request.Format} {request.MaxWidth}x{request.MaxHeight} has been processed. Served from transformer");
 
                 return transformedImageBytes;
             }

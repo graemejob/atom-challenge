@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using ImageServiceCore.ImageServiceRequestConverter;
 using ImageServiceCore.Interfaces;
 using ImageServiceCore.Services;
 using System;
@@ -9,50 +10,22 @@ namespace ImageServiceCore.Specs.Steps
     [Binding]
     public class TransformedImageCachingSteps
     {
-        private readonly ScenarioContext scenarioContext;
-        private (string Name, (int? Width, int? Height) MaxSize, string Format, string Colour, string Watermark) request;
+        private string converterOutputFilename;
         private string transformFilename;
-        public TransformedImageCachingSteps(ScenarioContext scenarioContext)
-        {
-            this.scenarioContext = scenarioContext;
-        }
 
-        [Given(@"image name is '(.*)'")]
-        public void GivenImageNameIs(string name)
+        [Given(@"encoded string name is '(.*)'")]
+        public void GivenImageNameIs(string converterOutputFilename)
         {
-            request.Name = name;
-        }
-        
-        [Given(@"transform width is (.*)")]
-        public void GivenTransformWidthIs(int maxWidth)
-        {
-            request.MaxSize.Width = maxWidth;
-        }
-        
-        [Given(@"transform height is (.*)")]
-        public void GivenTransformHeightIs(int maxHeight)
-        {
-            request.MaxSize.Height = maxHeight;
-        }
-        
-        [Given(@"transform format is (.*)")]
-        public void GivenTransformFormatIs(string format)
-        {
-            request.Format = format;
-        }
-        
-        [Given(@"watermark is '(.*)'")]
-        public void GivenWatermarkIs(string watermark)
-        {
-            request.Watermark = watermark;
+            this.converterOutputFilename = converterOutputFilename;
         }
         
         [When(@"we make the cache exists request")]
         public void WhenWeMakeTheCacheExistsRequest()
         {
             var fakeStorage = new FakeCacheStorage();
-            var service = new TransformedImageCache(fakeStorage);
-            service.Exists(request.Name, request.Format, request.MaxSize, request.Colour, request.Watermark);
+            var fakeRequestConverter = new FakeRequestConverter(converterOutputFilename);
+            var service = new TransformedImageCache(fakeStorage, fakeRequestConverter);
+            service.Exists(new());
             transformFilename = fakeStorage.NameParameter;
         }
         
@@ -62,6 +35,18 @@ namespace ImageServiceCore.Specs.Steps
             transformFilename.Should().Be(filename);
         }
 
+        class FakeRequestConverter : IEncodedStringImageTransformationRequestConverter
+        {
+            private readonly string outputEncodedString;
+
+            public FakeRequestConverter(string outputEncodedString)
+            {
+                this.outputEncodedString = outputEncodedString;
+            }
+            public ImageTransformationRequest ConvertFrom(string source) => null;
+
+            public string ConvertTo(ImageTransformationRequest source) => outputEncodedString;
+        }
 
         class FakeCacheStorage : ICacheBlobStorage
         {

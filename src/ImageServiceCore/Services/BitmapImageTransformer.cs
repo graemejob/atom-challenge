@@ -1,4 +1,5 @@
-﻿using ImageServiceCore.Interfaces;
+﻿using ImageServiceCore.ImageServiceRequestConverter;
+using ImageServiceCore.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Drawing;
@@ -25,25 +26,23 @@ namespace ImageServiceCore.Services
         /// Transform image bytes from one format or resolution to another, optionally with a watermark
         /// </summary>
         /// <param name="bytes">Byte array containing the image file data</param>
-        /// <param name="format">extension of the desired output format (eg "png", "jpeg", etc)</param>
-        /// <param name="maxSize">Maximum width and/or height the returned image can have, or null if there is no width and/or height constraint</param>
-        /// <param name="colour">Optional colour background for image</param>
-        /// <param name="watermark">Optional text to draw onto the image</param>
+        /// <param name="request">Image transformation parameters</param>
         /// <returns>Array of bytes representing the transformed image file</returns>
-        public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
+        public byte[] Transform(byte[] bytes, ImageTransformationRequest request)
         {
             var stopwatch = Stopwatch.StartNew();
 
-            byte[] returnBytes = null;
+            byte[] returnBytes;
 
             var image = LoadImage(bytes);
             
             var currentImageFormat = image.RawFormat;
-            var newImageFormat = ParseImageFormatOrDefault(format) ?? currentImageFormat;
+            var newImageFormat = ParseImageFormatOrDefault(request.Format) ?? currentImageFormat;
             var currentDims = (image.Width, image.Height);
-            var newDims = CalculateNewDimensions((image.Width, image.Height), maxSize);
+            var maxDims = (request.MaxWidth, request.MaxHeight);
+            var newDims = CalculateNewDimensions(currentDims, maxDims);
 
-            if (string.IsNullOrWhiteSpace(watermark) && string.IsNullOrWhiteSpace(colour) && newDims == currentDims && newImageFormat == currentImageFormat)
+            if (string.IsNullOrWhiteSpace(request.Watermark) && string.IsNullOrWhiteSpace(request.Colour) && newDims == currentDims && newImageFormat == currentImageFormat)
             {
                 logger.LogTrace("No transformation required. Returning original image");
                 // No transformation required
@@ -51,16 +50,16 @@ namespace ImageServiceCore.Services
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(colour))
+                if (!string.IsNullOrWhiteSpace(request.Colour))
                 {
                     logger.LogTrace("Colouring background");
-                    image = ColourBackground(colour, image);
+                    image = ColourBackground(request.Colour, image);
                 }
 
-                if (!string.IsNullOrWhiteSpace(watermark))
+                if (!string.IsNullOrWhiteSpace(request.Watermark))
                 {
                     logger.LogTrace("Drawing watermark");
-                    DrawWatermark(watermark, image);
+                    DrawWatermark(request.Watermark, image);
                 }
 
                 if (newDims != currentDims)

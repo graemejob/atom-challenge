@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using ImageServiceCore.ImageServiceRequestConverter;
 using ImageServiceCore.Interfaces;
 using ImageServiceCore.Services;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -73,13 +74,13 @@ namespace ImageServiceCore.Specs.Steps
         [When(@"requesting the image from Image Service")]
         public void WhenRequestingTheImageFromImageService()
         {
-            var fakeImageBlobStorage = new FakeImageBlobStorage(name, existsInBlobStorage);
-            var fakeTransformedImageCache = new FakeTransformedImageCache(name, format, (maxWidth, maxHeight), colour, watermark, existsInCacheStorage);
+            var fakeImageBlobStorage = new FakeImageBlobStorage(existsInBlobStorage);
+            var fakeTransformedImageCache = new FakeTransformedImageCache(existsInCacheStorage);
             var fakeImageTransformer = new FakeImageTransformer();
 
             var service = new ImageService(fakeTransformedImageCache, fakeImageBlobStorage, fakeImageTransformer, NullLogger<ImageService>.Instance);
 
-            service.Get(name, format, (maxWidth, maxHeight), colour, watermark);
+            service.Get(new(name, format, maxWidth, maxHeight, colour, watermark));
             Thread.Sleep(10); // Wait for async task to finish
             cacheIsChecked = fakeTransformedImageCache.ExistsCalled;
             imageReadFromCacheStorage = fakeTransformedImageCache.GetCalled;
@@ -131,39 +132,29 @@ namespace ImageServiceCore.Specs.Steps
 
         class FakeTransformedImageCache : ITransformedImageCache
         {
-            private readonly string name;
-            private readonly string format;
-            private readonly (int? Width, int? Height) maxSize;
-            private readonly string watermark;
-            private readonly string colour;
             private readonly bool exists;
 
-            public FakeTransformedImageCache(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark, bool exists)
+            public FakeTransformedImageCache(bool exists)
             {
-                this.name = name;
-                this.format = format;
-                this.maxSize = maxSize;
-                this.watermark = watermark;
-                this.colour = colour;
                 this.exists = exists;
             }
 
             public bool ExistsCalled { get; set; } = false;
             public bool GetCalled { get; set; } = false;
             public bool SetCalled { get; set; } = false;
-            public bool Exists(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
+            public bool Exists(ImageTransformationRequest request)
             {
                 ExistsCalled = true;
-                return this.exists && this.name == name && this.format == format && this.maxSize == maxSize && this.colour == colour && this.watermark == watermark;
+                return this.exists;
             }
 
-            public byte[] Get(string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
+            public byte[] Get(ImageTransformationRequest request)
             {
                 GetCalled = true;
                 return new byte[0];
             }
 
-            public void Set(byte[] bytes, string name, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
+            public void Set(byte[] bytes, ImageTransformationRequest request)
             {
                 SetCalled = true;
             }
@@ -171,12 +162,10 @@ namespace ImageServiceCore.Specs.Steps
 
         class FakeImageBlobStorage : IImageBlobStorage
         {
-            private readonly string name;
             private readonly bool exists;
 
-            public FakeImageBlobStorage(string name, bool exists)
+            public FakeImageBlobStorage(bool exists)
             {
-                this.name = name;
                 this.exists = exists;
             }
 
@@ -186,7 +175,7 @@ namespace ImageServiceCore.Specs.Steps
             public bool Exists(string name)
             {
                 ExistsCalled = true;
-                return exists && name == this.name;
+                return exists;
             }
 
             public byte[] Get(string name)
@@ -208,7 +197,7 @@ namespace ImageServiceCore.Specs.Steps
         class FakeImageTransformer : IImageTransformer
         {
             public bool TransformCalled { get; set; } = false;
-            public byte[] Transform(byte[] bytes, string format, (int? Width, int? Height) maxSize, string colour, string watermark)
+            public byte[] Transform(byte[] bytes, ImageTransformationRequest request)
             {
                 TransformCalled = true;
                 return new byte[0];

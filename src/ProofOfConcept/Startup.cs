@@ -1,15 +1,12 @@
 using ImageServiceCore.Extensions;
-using ImageServiceCore.Interfaces;
+using ImageServiceCore.ImageServiceRequestConverter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Primitives;
+using ProofOfConcept.Extensions;
 using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProofOfConcept
 {
@@ -22,7 +19,8 @@ namespace ProofOfConcept
             services.AddImageService();
             services.AddImageServiceLocalFileStorage();
             services.AddBitmapImageTransformer();
-
+            
+            services.AddTransient<IEncodedStringImageTransformationRequestConverter, EncodedStringImageTransformationRequestConverterV1>();
             services.AddRazorPages();
             services.AddResponseCaching(options =>
             {
@@ -61,34 +59,9 @@ namespace ProofOfConcept
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
-                endpoints.MapGet("/images/{name}", ImageRequestHandler);
+                endpoints.MapImageServiceEndpoint("/images/");
             });
         }
 
-        private static async Task ImageRequestHandler(HttpContext context)
-        {
-            var name = context.Request.RouteValues["name"] as string;
-            var maxWidth = context.Request.Query["w"].Select(s => (int?)int.Parse(s)).FirstOrDefault();
-            var maxHeight = context.Request.Query["h"].Select(s => (int?)int.Parse(s)).FirstOrDefault();
-            var colour = context.Request.Query["c"].FirstOrDefault();
-            var watermark = context.Request.Query["t"].FirstOrDefault();
-            var format = context.Request.Query["f"].FirstOrDefault();
-
-            var imageService = context.RequestServices.GetRequiredService<IImageService>();
-            var imageBytes = imageService.Get(name, format, (maxWidth, maxHeight), colour, watermark);
-
-            if (imageBytes != null)
-            {
-                var contentType = $"image/{format ?? Path.GetExtension(name)}";
-                context.Response.StatusCode = 200;
-                context.Response.Headers.Add("Content-Type", new StringValues(contentType));
-                await context.Response.BodyWriter.WriteAsync(imageBytes);
-            }
-            else
-            {
-                context.Response.StatusCode = 404;
-                await context.Response.WriteAsync("Image does not exist");
-            }
-        }
     }
 }

@@ -55,29 +55,30 @@
             function updateImageLink() {
 
                 var imageLink = "images/";
-
-                imageLink += document.getElementById('imgName').value;
+                var imageFilename = document.getElementById('imgName').value;
+                imageLink += imageFilename;
 
                 var params = {
                     w: document.getElementById('imgMaxWidth').value,
                     h: document.getElementById('imgMaxHeight').value,
-                    f: document.getElementById('imgFormat').value,
-                    c: document.getElementById('imgColour').value,
+                    b: document.getElementById('imgColour').value,
                     t: document.getElementById('imgWatermark').value
                 };
 
+                var format = document.getElementById('imgFormat').value;
+                if (!format) format = imageFilename.split('.').pop();
+
                 if (!params.w) delete params.w;
                 if (!params.h) delete params.h;
-                if (!params.f) delete params.f;
-                if (!params.c) delete params.c;
+                if (!params.b) delete params.b;
                 if (!params.t) delete params.t;
 
                 var esc = encodeURIComponent;
                 var query = Object.keys(params)
-                    .map(k => esc(k) + '=' + esc(params[k]))
-                    .join('&');
+                    .map(k => esc(k) + esc(params[k]))
+                    .join('_');
 
-                if (query) imageLink += "?" + query;
+                if (query) imageLink += "!" + query + "." + format;
 
                 document.getElementById('imageLink').innerText = imageLink;
             }

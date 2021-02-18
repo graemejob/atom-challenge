@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageServiceCore", "ImageSe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageServiceCore.Specs", "ImageServiceCore.Specs\ImageServiceCore.Specs.csproj", "{96AF8535-F3E8-49A3-A0A3-27151FE093D0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{03FF2346-A760-4983-93AE-B6BD3E6AA481}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{96AF8535-F3E8-49A3-A0A3-27151FE093D0} = {03FF2346-A760-4983-93AE-B6BD3E6AA481}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8AFC4167-EA7B-472F-A6E0-78AEF2355CC7}

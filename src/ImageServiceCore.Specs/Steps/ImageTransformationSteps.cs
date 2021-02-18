@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using ImageServiceCore.ImageServiceRequestConverter;
 using ImageServiceCore.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -15,15 +16,16 @@ namespace ImageServiceCore.Specs.Steps
     {
         private readonly ScenarioContext scenarioContext;
 
-        public ImageTransformationSteps(ScenarioContext scenarioContext)
-        {
-            this.scenarioContext = scenarioContext;
-        }
-
         private byte[] originalImageBytes;
-        private ((int? Width, int? Height) MaxSize, string Format, string Colour, string Watermark) request;
+        private ImageTransformationRequest request;
         private byte[] outputImageBytes;
         private Image outputImage;
+
+        public ImageTransformationSteps(ScenarioContext scenarioContext)
+        {
+            request = new();
+            this.scenarioContext = scenarioContext;
+        }
 
         private ImageFormat ParseImageFormat(string format)
         {
@@ -54,13 +56,13 @@ namespace ImageServiceCore.Specs.Steps
         }
 
         [Given(@"we request no transformations")]
-        public void GivenWeRequestNoTransformations() => request = default;
+        public void GivenWeRequestNoTransformations() => request = new();
 
         [Given(@"we request max width is (.*)")]
-        public void GivenWeRequestMaxWidthIs(int maxWidth) => request.MaxSize.Width = maxWidth;
+        public void GivenWeRequestMaxWidthIs(int maxWidth) => request.MaxWidth = maxWidth;
 
         [Given(@"we request max height is (.*)")]
-        public void GivenWeRequestMaxHeightIs(int maxHeight) => request.MaxSize.Height = maxHeight;
+        public void GivenWeRequestMaxHeightIs(int maxHeight) => request.MaxHeight = maxHeight;
 
         [Given(@"we request the format is (.*)")]
         public void GivenWeRequestAFormatOfPng(string format) => request.Format = format;
@@ -77,7 +79,7 @@ namespace ImageServiceCore.Specs.Steps
         public void WhenWeMakeTheTransformationRequest()
         {
             var service = new BitmapImageTransformer(NullLogger<BitmapImageTransformer>.Instance);
-            outputImageBytes = service.Transform(originalImageBytes, request.Format, request.MaxSize, request.Colour, request.Watermark);
+            outputImageBytes = service.Transform(originalImageBytes, request);
             using (var ms = new MemoryStream(outputImageBytes))
             {
                 outputImage = new Bitmap(ms);
