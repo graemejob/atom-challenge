@@ -7,6 +7,7 @@ Open the solution (\atom-challenge\src\Solution.sln) and set the ProofOfConcept 
 Git doesn't like empty folders, so the application creates them when it starts. You should now be able to navigate to the following folders:
    * \atom-challenge\blobstorage\images
    * \atom-challenge\blobstorage\cache
+
 Place all the original images in \atom-challenge\blobstorage\images and refresh the dashboard. You should now see a list.
 You can select an image in the list, and click Set as background to view it.
 You can also set whatever transformation parameters you want, and the url will update automatically to reflect the change.
