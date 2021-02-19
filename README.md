@@ -47,6 +47,7 @@ This solution utilises 3 levels of caching
 5. Cached image blob storage
    A single image request will only be transformed once
 
+![Architecture](https://github.com/graemejob/atom-challenge/blob/main/docs/Architecture%20Layers%20and%20Flow.png?raw=true)
 
 ## Optimising load performance
 
