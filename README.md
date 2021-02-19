@@ -34,7 +34,7 @@ Some examples:
 
 ## Scalability
 
-The Proof of Concept ASP.NET Core application I have put together utilises filesystem storage for both original images, and cached images. This would allow the application to be spun up across multiple servers, so long as they have access to the filesystem storage via network, etc. I've kept data access seperate between originals and cache so that different technologies could be used, and also if serving images to different regions, you may want to have a seperate cache per region if the popular product imagry differs around the world, while still having a single store of original imagry.
+The Proof of Concept ASP.NET Core application I have put together utilises filesystem storage for both original images, and cached images. This would allow the application to be spun up across multiple servers, so long as they have access to the filesystem storage via network, etc. I've kept data access seperate between originals and cache so that different technologies could be used, and also if serving images to different regions, you may want to have a seperate cache per region if the popular product imagry differs around the world, while still having a single store of original imagry. It would be easy to impliment a Azure Cloud Storage adapter for IBlobStorage and use that instead of file system storage, if one so desires.
 
 
 ## Caching
