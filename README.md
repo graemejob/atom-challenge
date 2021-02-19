@@ -2,6 +2,16 @@
 
 This challenge set out a goal to write a scalable solution for serving images with certain transformation requirements, and utilise caching to reduce the time required to serve a transformed image. In this repository I have a solution with a ProofOfConcept web application project in it. When you start it up, you are presented with a kind of transformation dashboard which lets you choose from a list of original images, and specify what transformation you want.
 
+## Getting Started
+Open the solution (\atom-challenge\src\Solution.sln) and set the ProofOfConcept as the startup project. Run the application. You will be presented with an ugly dashboard page with a message saying there are no files in the folder.
+Git doesn't like empty folders, so the application creates them when it starts. You should now be able to navigate to the following folders:
+   * \atom-challenge\blobstorage\images
+   * \atom-challenge\blobstorage\cache
+Place all the original images in \atom-challenge\blobstorage\images and refresh the dashboard. You should now see a list.
+You can select an image in the list, and click Set as background to view it.
+You can also set whatever transformation parameters you want, and the url will update automatically to reflect the change.
+
+
 ## Naming Convention
 The naming convention for transformation requests are as follows:
 /images/ is the default path. This can be changes in Startup.cs
